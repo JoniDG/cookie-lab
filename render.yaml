@@ -1,0 +1,40 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+#
+# The cross-site URLs are literals because `fromService` only exposes the
+# private-network host, not the public onrender.com URL. If Render appends a
+# suffix to a name that is taken (e.g. cookie-lab-api-x1y2.onrender.com), edit
+# ALLOWED_ORIGIN / VITE_API_URL in the dashboard and redeploy the front.
+services:
+  # Mode A: same-origin. Go serves the embedded SPA and the API.
+  - type: web
+    name: cookie-lab
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: COOKIE_MODE
+        value: same-site
+
+  # Mode B: cross-site API (same image; only the env changes).
+  - type: web
+    name: cookie-lab-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: COOKIE_MODE
+        value: cross-site
+      - key: ALLOWED_ORIGIN
+        value: https://cookie-lab-front.onrender.com
+
+  # Mode B: cross-site front, a static site pointing at the API above.
+  - type: web
+    name: cookie-lab-front
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: VITE_API_URL
+        value: https://cookie-lab-api.onrender.com

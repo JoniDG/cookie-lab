@@ -1,0 +1,7 @@
+node_modules/
+frontend/dist/
+backend/coverage.out
+# Filled by `make web` / the Dockerfile; only the placeholder is versioned.
+backend/web/dist/*
+!backend/web/dist/.gitkeep
+.DS_Store
